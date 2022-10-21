@@ -77,6 +77,7 @@ async def on_ready():
 
 @client.tree.command()
 async def play(interaction: discord.Interaction):
+    """Get a SysTD"""
     color_code = 0x0000ff
     embed=discord.Embed(title=interaction.user.display_name, color=color_code)
     embed.set_author(name="SysTD")
