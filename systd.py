@@ -7,23 +7,68 @@ from discord.ui import Button, View
 import random
 import csv
 
-def get_td(type,nsfw="No"):
-    tds = []
+# def get_td(type,nsfw="No"):
+#     tds = []
+#     with open('tds.csv', newline='') as csvfile:
+#         reader = csv.DictReader(csvfile)
+#         for row in reader:
+#             if row["What is it?"] == type and row["NSFW?"] == nsfw:
+#                 tds.append(row["Truth or Dare"])
+#         td = random.choice(tds)
+#     print(td)
+#     return td
+
+truths_pg = [] ## Initialize
+truths_nsfw = [] ## Initialize
+dares_pg = [] ## Initialize
+dares_nsfw = [] ## Initialize
+def gen_tds():
+    '''Generate four lists for the Truth or Dares\n
+    Only creates a list if it is empty'''
+    update_truths_pg = update_truths_nsfw = update_dares_pg = update_dares_nsfw = 0 ## Initialize
+    if len(truths_pg) < 1:
+        update_truths_pg = 1
+    if len(truths_nsfw) < 1:
+        update_truths_nsfw = 1
+    if len(dares_pg) < 1:
+        update_dares_pg = 1
+    if len(dares_nsfw) < 1:
+        update_dares_nsfw = 1
     with open('tds.csv', newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            if row["What is it?"] == type and row["NSFW?"] == nsfw:
-                tds.append(row["Truth or Dare"])
-        td = random.choice(tds)
-    print(td)
-    return td
-
+            if row["What is it?"] == "Truth":
+                if row["NSFW?"] == "No" and update_truths_pg:
+                    truths_pg.append(row["Truth or Dare"])
+                elif row["NSFW?"] == "Yes" and update_truths_nsfw:
+                    truths_nsfw.append(row["Truth or Dare"])
+            elif row["What is it?"] == "Dare":
+                if row["NSFW?"] == "No" and update_dares_pg:
+                    dares_pg.append(row["Truth or Dare"])
+                elif row["NSFW?"] == "Yes" and update_dares_nsfw:
+                    dares_nsfw.append(row["Truth or Dare"])
+gen_tds() ## Run it once on load
 
 def gen_embed(person,color_code,type,nsfw="No"):
     embed=discord.Embed(title=person, color=color_code)
     embed.set_author(name="SysTD")
-    td_value = get_td(type, nsfw)
-    #td_value = "ERROR"
+
+    if type == "Dare" and nsfw == "Yes":
+        from_list = dares_nsfw
+    elif type == "Dare" and nsfw == "No":
+        from_list = dares_pg
+    elif type == "Truth" and nsfw == "Yes":
+        from_list = truths_nsfw
+    elif type == "Truth" and nsfw == "No":
+        from_list = truths_pg
+    else: ## Change this later.
+        from_list = truths_pg
+    td_value = random.choice(from_list)
+    from_list.remove(td_value)
+
+    if len(dares_nsfw) < 1 or len(dares_pg) < 1 or len(truths_nsfw) < 1 or len(truths_pg) < 1: ## If any list got emptied, go regenerate them
+        print("calling regen")
+        gen_tds()
     type_name = ""
     if nsfw == "Yes":
         type_name = "NSFW "
