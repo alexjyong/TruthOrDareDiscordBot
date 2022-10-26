@@ -9,9 +9,10 @@ Clone this repo onto the server that you plan to run the bot out of. Within the 
 With your favorite editor, add this to the file:
 ```
 TOKEN='tokenFromTheLastStepHere'
-
-
+BOTAUTHOR='WhatEverYouWantTheNameToBe'
 ```
+
+(If you don't add in BOTAUTHOR, it will use the name `SysTD` by default.
 
 With the API key you get from that guide, chec
 
