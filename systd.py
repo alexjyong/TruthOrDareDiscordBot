@@ -15,17 +15,7 @@ dares_nsfw = []  ## Initialize
 
 
 def gen_tds():
-    """Generate four lists for the Truth or Dares\n
-    Only creates a list if it is empty"""
-    # update_truths_pg = update_truths_nsfw = update_dares_pg = update_dares_nsfw = 0 ## Initialize
-    # if len(truths_pg) < 1:
-    #     update_truths_pg = 1
-    # if len(truths_nsfw) < 1:
-    #     update_truths_nsfw = 1
-    # if len(dares_pg) < 1:
-    #     update_dares_pg = 1
-    # if len(dares_nsfw) < 1:
-    #     update_dares_nsfw = 1
+    """Generate four lists for the Truth or Dares"""
     with open("tds.csv", newline="", encoding="utf-8") as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
@@ -51,14 +41,15 @@ truths_nsfw_master = truths_nsfw.copy()
 dares_pg_master = dares_pg.copy()
 dares_nsfw_master = dares_nsfw.copy()
 
+bot_author = os.getenv("BOTAUTHOR")
+print(bot_author)
+if bot_author == None: #use this as default name if the user didn't set it.
+    bot_author = "SysTD"
 
 def gen_embed(person, color_code, type, nsfw="No"):
-    botAuthor = os.getenv("BOTAUTHOR")
-    if botAuthor is "None": #use this as default name if the user didn't set it.
-        botAuthor = "SysTD"
     global dares_nsfw, dares_nsfw_master, dares_pg, dares_pg_master, truths_nsfw, truths_nsfw_master, truths_pg, truths_pg_master
     embed = discord.Embed(title=person, color=color_code)
-    embed.set_author(name=botAuthor)
+    embed.set_author(name=bot_author)
     if type == "Dare" and nsfw == "Yes":
         from_list = dares_nsfw
     elif type == "Dare" and nsfw == "No":
@@ -116,9 +107,10 @@ async def on_ready():
 
 @client.tree.command()
 async def play(interaction: discord.Interaction):
+    '''Start the truth or dare activity'''
     color_code = 0x0000FF
     embed = discord.Embed(title=interaction.user.display_name, color=color_code)
-    embed.set_author(name="SysTD")
+    embed.set_author(name=bot_author)
 
     async def button_truth_callback(interaction):
         color_code = 0x0000FF
