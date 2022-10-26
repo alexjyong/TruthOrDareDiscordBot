@@ -47,9 +47,10 @@ dares_pg_master = dares_pg.copy()
 dares_nsfw_master = dares_nsfw.copy()
 
 def gen_embed(person,color_code,type,nsfw="No"):
+    global botAuthor = os.getenv('botAuthor') || "SysTD"
     global dares_nsfw, dares_nsfw_master, dares_pg, dares_pg_master, truths_nsfw, truths_nsfw_master, truths_pg, truths_pg_master
     embed=discord.Embed(title=person, color=color_code)
-    embed.set_author(name="SysTD")
+    embed.set_author(name=botAuthor)
     if type == "Dare" and nsfw == "Yes":
         from_list = dares_nsfw
     elif type == "Dare" and nsfw == "No":
