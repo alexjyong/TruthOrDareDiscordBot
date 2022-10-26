@@ -7,17 +7,6 @@ from discord.ui import Button, View
 import random
 import csv
 
-# def get_td(type,nsfw="No"):
-#     tds = []
-#     with open('tds.csv', newline='') as csvfile:
-#         reader = csv.DictReader(csvfile)
-#         for row in reader:
-#             if row["What is it?"] == type and row["NSFW?"] == nsfw:
-#                 tds.append(row["Truth or Dare"])
-#         td = random.choice(tds)
-#     print(td)
-#     return td
-
 truths_pg = [] ## Initialize
 truths_nsfw = [] ## Initialize
 dares_pg = [] ## Initialize
@@ -34,19 +23,22 @@ def gen_tds():
         update_dares_pg = 1
     if len(dares_nsfw) < 1:
         update_dares_nsfw = 1
-    with open('tds.csv', newline='') as csvfile:
+    with open('tds.csv', newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            if row["What is it?"] == "Truth":
-                if row["Type"] == "SFW" and update_truths_pg:
-                    truths_pg.append(row["Truth or Dare"])
-                elif row["Type"] == "NSFW" and update_truths_nsfw:
-                    truths_nsfw.append(row["Truth or Dare"])
-            elif row["What is it?"] == "Dare":
-                if row["Type"] == "SFW" and update_dares_pg:
-                    dares_pg.append(row["Truth or Dare"])
-                elif row["Type"] == "NSFW" and update_dares_nsfw:
-                    dares_nsfw.append(row["Truth or Dare"])
+            td = row["What is it?"]
+            type = row["Type"]
+            value = row["Truth or Dare"]
+            if td == "Truth":
+                if type == "SFW" and update_truths_pg:
+                    truths_pg.append(value)
+                elif type == "NSFW" and update_truths_nsfw:
+                    truths_nsfw.append(value)
+            elif td == "Dare":
+                if type == "SFW" and update_dares_pg:
+                    dares_pg.append(value)
+                elif type == "NSFW" and update_dares_nsfw:
+                    dares_nsfw.append(value)
 gen_tds() ## Run it once on load
 
 def gen_embed(person,color_code,type,nsfw="No"):
