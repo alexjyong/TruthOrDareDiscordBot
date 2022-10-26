@@ -12,8 +12,7 @@ truths_nsfw = [] ## Initialize
 dares_pg = [] ## Initialize
 dares_nsfw = [] ## Initialize
 def gen_tds():
-    '''Generate four lists for the Truth or Dares\n
-    Only creates a list if it is empty'''
+    '''Generate four lists for the Truth or Dares'''
     # update_truths_pg = update_truths_nsfw = update_dares_pg = update_dares_nsfw = 0 ## Initialize
     # if len(truths_pg) < 1:
     #     update_truths_pg = 1
@@ -103,6 +102,7 @@ async def on_ready():
 
 @client.tree.command()
 async def play(interaction: discord.Interaction):
+    '''Start the truth or dare activity'''
     color_code = 0x0000ff
     embed=discord.Embed(title=interaction.user.display_name, color=color_code)
     embed.set_author(name="SysTD")
