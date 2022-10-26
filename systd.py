@@ -76,6 +76,7 @@ def gen_embed(person, color_code, type, nsfw="No"):
         type_name = "NSFW "
     type_name += type
     embed.add_field(name=f"Your {type_name}:", value=td_value, inline=False)
+    embed.set_thumbnail(url='https://sharepointlist.com/images/TD2.png')
     return embed
 
 
@@ -111,6 +112,7 @@ async def play(interaction: discord.Interaction):
     color_code = 0x0000FF
     embed = discord.Embed(title=interaction.user.display_name, color=color_code)
     embed.set_author(name=bot_author)
+    embed.set_thumbnail(url='https://sharepointlist.com/images/TD2.png')
 
     async def button_truth_callback(interaction):
         color_code = 0x0000FF
