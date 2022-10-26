@@ -38,14 +38,14 @@ def gen_tds():
         reader = csv.DictReader(csvfile)
         for row in reader:
             if row["What is it?"] == "Truth":
-                if row["NSFW?"] == "No" and update_truths_pg:
+                if row["Type"] == "SFW" and update_truths_pg:
                     truths_pg.append(row["Truth or Dare"])
-                elif row["NSFW?"] == "Yes" and update_truths_nsfw:
+                elif row["Type"] == "NSFW" and update_truths_nsfw:
                     truths_nsfw.append(row["Truth or Dare"])
             elif row["What is it?"] == "Dare":
-                if row["NSFW?"] == "No" and update_dares_pg:
+                if row["Type"] == "SFW" and update_dares_pg:
                     dares_pg.append(row["Truth or Dare"])
-                elif row["NSFW?"] == "Yes" and update_dares_nsfw:
+                elif row["Type"] == "NSFW" and update_dares_nsfw:
                     dares_nsfw.append(row["Truth or Dare"])
 gen_tds() ## Run it once on load
 
