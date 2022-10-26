@@ -14,15 +14,15 @@ dares_nsfw = [] ## Initialize
 def gen_tds():
     '''Generate four lists for the Truth or Dares\n
     Only creates a list if it is empty'''
-    update_truths_pg = update_truths_nsfw = update_dares_pg = update_dares_nsfw = 0 ## Initialize
-    if len(truths_pg) < 1:
-        update_truths_pg = 1
-    if len(truths_nsfw) < 1:
-        update_truths_nsfw = 1
-    if len(dares_pg) < 1:
-        update_dares_pg = 1
-    if len(dares_nsfw) < 1:
-        update_dares_nsfw = 1
+    # update_truths_pg = update_truths_nsfw = update_dares_pg = update_dares_nsfw = 0 ## Initialize
+    # if len(truths_pg) < 1:
+    #     update_truths_pg = 1
+    # if len(truths_nsfw) < 1:
+    #     update_truths_nsfw = 1
+    # if len(dares_pg) < 1:
+    #     update_dares_pg = 1
+    # if len(dares_nsfw) < 1:
+    #     update_dares_nsfw = 1
     with open('tds.csv', newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
@@ -30,21 +30,26 @@ def gen_tds():
             type = row["Type"]
             value = row["Truth or Dare"]
             if td == "Truth":
-                if type == "SFW" and update_truths_pg:
+                if type == "SFW":
                     truths_pg.append(value)
-                elif type == "NSFW" and update_truths_nsfw:
+                elif type == "NSFW":
                     truths_nsfw.append(value)
             elif td == "Dare":
-                if type == "SFW" and update_dares_pg:
+                if type == "SFW":
                     dares_pg.append(value)
-                elif type == "NSFW" and update_dares_nsfw:
+                elif type == "NSFW":
                     dares_nsfw.append(value)
 gen_tds() ## Run it once on load
+# copy all to master lists
+truths_pg_master = truths_pg.copy()
+truths_nsfw_master = truths_nsfw.copy()
+dares_pg_master = dares_pg.copy()
+dares_nsfw_master = dares_nsfw.copy()
 
 def gen_embed(person,color_code,type,nsfw="No"):
+    global dares_nsfw, dares_nsfw_master, dares_pg, dares_pg_master, truths_nsfw, truths_nsfw_master, truths_pg, truths_pg_master
     embed=discord.Embed(title=person, color=color_code)
     embed.set_author(name="SysTD")
-
     if type == "Dare" and nsfw == "Yes":
         from_list = dares_nsfw
     elif type == "Dare" and nsfw == "No":
@@ -57,10 +62,15 @@ def gen_embed(person,color_code,type,nsfw="No"):
         from_list = truths_pg
     td_value = random.choice(from_list)
     from_list.remove(td_value)
-
-    if len(dares_nsfw) < 1 or len(dares_pg) < 1 or len(truths_nsfw) < 1 or len(truths_pg) < 1: ## If any list got emptied, go regenerate them
-        print("calling regen")
-        gen_tds()
+    # If any list got emptied, copy it from the master
+    if len(dares_nsfw) < 1:
+        dares_nsfw = dares_nsfw_master.copy()
+    if len(dares_pg) < 1:
+        dares_pg = dares_pg_master.copy()
+    if len(truths_nsfw) < 1:
+        truths_nsfw = truths_nsfw_master.copy()
+    if len(truths_pg) < 1:
+        truths_pg = truths_pg_master.copy()
     type_name = ""
     if nsfw == "Yes":
         type_name = "NSFW "
