@@ -14,7 +14,6 @@ BOTAUTHOR='WhatEverYouWantTheNameToBe'
 
 (If you don't add in BOTAUTHOR, it will use the name `SysTD` by default.
 
-With the API key you get from that guide, chec
 
 install discord.py and python-dotenv via pip, then run
 `python3 systd.py`
