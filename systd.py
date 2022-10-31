@@ -79,7 +79,6 @@ def gen_embed(person, color_code, type, nsfw="No"):
     embed.set_thumbnail(url='https://sharepointlist.com/images/TD2.png')
     return embed
 
-
 class MyClient(discord.Client):
     def __init__(self, *, intents: discord.Intents):
         super().__init__(intents=intents)
@@ -87,7 +86,6 @@ class MyClient(discord.Client):
 
     async def setup_hook(self):
         await self.tree.sync()
-
 
 intents = discord.Intents.default()
 client = MyClient(intents=intents)
@@ -105,62 +103,47 @@ async def on_ready():
     # Print total
     print("SysTD is in " + str(guild_count) + " servers.")
 
-
 @client.tree.command()
 async def play(interaction: discord.Interaction):
     '''Start the truth or dare activity'''
+    global sent_msg, embed
     color_code = 0x0000FF
     embed = discord.Embed(title=interaction.user.display_name, color=color_code)
     embed.set_author(name=bot_author)
     embed.set_thumbnail(url='https://sharepointlist.com/images/TD2.png')
 
-    async def button_truth_callback(interaction):
-        color_code = 0x0000FF
-        type = "Truth"
-        person = interaction.user.display_name
-        embed = gen_embed(person, color_code, type)
-        await interaction.response.send_message(embed=embed, view=view)
-        return None
+    class MyButton(Button):
+        async def callback(self, interaction: interaction):
+            global sent_msg, embed, style
+            await sent_msg.edit(embed=embed, view=None)
+            if self.label == "Truth" or self.label == "NSFW Truth":
+                color_code = 0x0000FF
+                type = "Truth"
+                self.style=discord.ButtonStyle.primary
+            elif self.label == "Dare" or self.label == "NSFW Dare":
+                color_code = 0xFF0000
+                type = "Dare"
+                self.style=discord.ButtonStyle.danger
+            if self.label == "NSFW Truth" or self.label == "NSFW Dare":
+                nsfw = "Yes"
+            else:
+                nsfw = "No"
+            person = interaction.user.display_name
+            embed = gen_embed(person, color_code, type, nsfw=nsfw)
+            await interaction.response.send_message(embed=embed, view=view)
+            sent_msg = await interaction.original_response()
 
-    async def button_dare_callback(interaction):
-        color_code = 0xFF0000
-        type = "Dare"
-        person = interaction.user.display_name
-        embed = gen_embed(person, color_code, type)
-        await interaction.response.send_message(embed=embed, view=view)
-        return None
+    view = View(timeout=None)
+    labels = ("Truth", "Dare", "NSFW Truth", "NSFW Dare")
+    for label in labels:
+        if label == "Truth" or label == "NSFW Truth":
+            style = discord.ButtonStyle.primary
+        else:
+            style = discord.ButtonStyle.danger
+        view.add_item(MyButton(label=label, style=style))
 
-    async def button_truth_nsfw_callback(interaction):
-        color_code = 0x0000FF
-        type = "Truth"
-        person = interaction.user.display_name
-        embed = gen_embed(person, color_code, type, nsfw="Yes")
-        await interaction.response.send_message(embed=embed, view=view)
-        return None
-
-    async def button_dare_nsfw_callback(interaction):
-        color_code = 0xFF0000
-        type = "Dare"
-        person = interaction.user.display_name
-        embed = gen_embed(person, color_code, type, nsfw="Yes")
-        await interaction.response.send_message(embed=embed, view=view)
-        return None
-
-    button_truth = Button(label="Truth", style=discord.ButtonStyle.primary)
-    button_dare = Button(label="Dare", style=discord.ButtonStyle.danger)
-    button_truth_nsfw = Button(label="NSFW Truth", style=discord.ButtonStyle.primary)
-    button_dare_nsfw = Button(label="NSFW Dare", style=discord.ButtonStyle.danger)
-    button_truth.callback = button_truth_callback
-    button_dare.callback = button_dare_callback
-    button_truth_nsfw.callback = button_truth_nsfw_callback
-    button_dare_nsfw.callback = button_dare_nsfw_callback
-    view = View()
-    view.add_item(button_truth)
-    view.add_item(button_dare)
-    view.add_item(button_truth_nsfw)
-    view.add_item(button_dare_nsfw)
     await interaction.response.send_message(embed=embed, view=view)
+    sent_msg = await interaction.original_response()
     return None
-
 
 client.run(os.getenv("TOKEN"))
