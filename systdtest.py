@@ -180,7 +180,6 @@ async def play(interaction: discord.Interaction):
 ])
 @app_commands.rename(tdinput='content')
 @app_commands.describe(tdinput='Your Truth or Dare')
-#async def addtd(interaction: discord.Interaction, tdinput: str, td2: str):
 async def addtd(interaction: discord.Interaction, truth_or_dare: app_commands.Choice[str], nsfw_or_nah: app_commands.Choice[str], tdinput: str):
     """Add a new item to the Truth or Dare bot"""
     print("test")
@@ -191,7 +190,6 @@ async def addtd(interaction: discord.Interaction, truth_or_dare: app_commands.Ch
     else:
         nsfw = "No"
         rating = "PG"
-    
     await interaction.response.send_message(f"You are trying to enter \"{tdinput}\" as a {rating} {truth_or_dare.value}\nThe bot is not processing submissions at this time")
 
 
