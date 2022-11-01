@@ -7,6 +7,7 @@ from discord import app_commands
 from discord.ui import Button, View
 import random
 import csv
+import asyncio
 
 truths_pg = []  ## Initialize
 truths_nsfw = []  ## Initialize
@@ -106,15 +107,33 @@ async def on_ready():
 @client.tree.command()
 async def play(interaction: discord.Interaction):
     '''Start the truth or dare activity'''
-    global sent_msg, embed
+    global sent_msg, embed, sleep_time, sleep_task
+    sleep_time = 150
     color_code = 0x0000FF
     embed = discord.Embed(title=interaction.user.display_name, color=color_code)
     embed.set_author(name=bot_author)
     embed.set_thumbnail(url='https://sharepointlist.com/images/TD2.png')
 
+    async def sleep_timer():
+        global sleep_task
+        try:
+            print("Starting sleep timer")
+            await asyncio.sleep(sleep_time)
+        except asyncio.CancelledError: # if it was canceled
+            # probably don't need the except since I'm not actually doing anything with it
+            print("Sleep timer canceled")
+            raise
+        else: # if it wasn't canceled
+            print("Sleep timer expired. Refreshing bot message and restarting sleep timer")
+            await sent_msg.edit(embed=embed, view=view)
+            sleep_task = asyncio.create_task(sleep_timer())
+        #finally: # Don't need a finally atm either
+            
     class MyButton(Button):
         async def callback(self, interaction: interaction):
-            global sent_msg, embed, style
+            global sent_msg, embed, style, sleep_task
+            # Cancel refresh timer
+            sleep_task.cancel()
             await sent_msg.edit(embed=embed, view=None)
             if self.label == "Truth" or self.label == "NSFW Truth":
                 color_code = 0x0000FF
@@ -132,8 +151,10 @@ async def play(interaction: discord.Interaction):
             embed = gen_embed(person, color_code, type, nsfw=nsfw)
             await interaction.response.send_message(embed=embed, view=view)
             sent_msg = await interaction.original_response()
+            # Restart refresh timer
+            sleep_task = asyncio.create_task(sleep_timer())
 
-    view = View(timeout=None)
+    view = View()
     labels = ("Truth", "Dare", "NSFW Truth", "NSFW Dare")
     for label in labels:
         if label == "Truth" or label == "NSFW Truth":
@@ -144,6 +165,6 @@ async def play(interaction: discord.Interaction):
 
     await interaction.response.send_message(embed=embed, view=view)
     sent_msg = await interaction.original_response()
-    return None
+    sleep_task = asyncio.create_task(sleep_timer())
 
 client.run(os.getenv("TOKEN"))
