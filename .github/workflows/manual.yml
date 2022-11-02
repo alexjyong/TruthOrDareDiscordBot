@@ -26,6 +26,8 @@ jobs:
             - uses: webfactory/ssh-agent@ v0.7.0
               with:
                   ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-            - run: |
+                  
+            - name: do stuff
+              run: |
                ssh botuser@bot.sysengineer.dev ls
   
