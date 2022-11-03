@@ -9,7 +9,7 @@ on:
     inputs:
       prod_deploy:
         type: boolean
-        description: If a deployment is production or not.
+        description: Check this bot if this is a production deployment of the bot! Otherwise, we will only update staging.
         default: false
 
 jobs:
