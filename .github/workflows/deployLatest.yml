@@ -32,19 +32,19 @@ jobs:
                  docker build -t staging-td .
                  docker run --name staging-td -d -t staging-td
 
-            - name: Update prod instance
-              uses: appleboy/ssh-action@master
-              if: ${{ github.event.inputs.prod_deploy }}
-              with:
-                host: ${{ secrets.HOST }}
-                username: ${{ secrets.USERNAME }}
-                password: ${{ secrets.PASSWORD }}
-                port: 22
-                script: |
-                 cd Prod;
-                 git pull;
-                 docker container rm -f prod-td;
-                 docker build -t prod-td .
-                 docker run --name prod-td -d -t prod-td
+            #- name: Update prod instance
+            #  uses: appleboy/ssh-action@master
+            #  if: ${{ github.event.inputs.prod_deploy }}
+            #  with:
+            #    host: ${{ secrets.HOST }}
+            #    username: ${{ secrets.USERNAME }}
+            #    password: ${{ secrets.PASSWORD }}
+            #    port: 22
+            #    script: |
+            #     cd Prod;
+            #     git pull;
+            #     docker container rm -f prod-td;
+            #     docker build -t prod-td .
+            #     docker run --name prod-td -d -t prod-td
 
   
