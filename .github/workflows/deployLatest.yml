@@ -6,8 +6,12 @@ name: Deploy to server
 # or API.
 on:
   workflow_dispatch:
+    inputs:
+      prod_deploy:
+        type: boolean
+        description: If a deployment is production or not.
+        default: false
 
-# .github/workflows/my-workflow.yml
 jobs:
     deployStuffYo:
         runs-on: ubuntu-latest
@@ -16,11 +20,13 @@ jobs:
             - name: executing remote ssh commands using password
               uses: appleboy/ssh-action@master
               with:
+                if: ${{ github.event.inputs.prod }}
                 host: ${{ secrets.HOST }}
                 username: ${{ secrets.USERNAME }}
                 password: ${{ secrets.PASSWORD }}
                 port: 22
                 script: |
+                 
                  cd Staging;
                  git pull;
                  docker container rm -f staging-td;
