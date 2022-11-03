@@ -13,8 +13,13 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: prepare environment
-              uses: webfactory/ssh-agent@ v0.7.0
+              uses: webfactory/ssh-agent@v0.7.0
               with:
                   ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  
+                             
+            - name: do stuff
+              run: |
+               ssh botuser@bot.sysengineer.dev ls
 
   
