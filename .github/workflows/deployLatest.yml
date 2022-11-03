@@ -24,7 +24,7 @@ jobs:
                  cd Staging;
                  git pull;
                  docker container rm -f staging-td;
-                 docker build -t staging-td
+                 docker build -t staging-td .
                  docker run --name staging-td -d -t staging-td
 
   
