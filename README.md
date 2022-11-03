@@ -1,5 +1,7 @@
 # Truth Or Dare Discord Bot
 
+![TD2](https://user-images.githubusercontent.com/5464404/199782516-4c46c951-e5c2-43e0-ac6c-99ec05158462.png)
+
 Truth or Dare Discord bot! Inspired by https://truthordarebot.xyz/. 
 
 To run on your discord server, set up a bot with [guide](https://discordpy.readthedocs.io/en/stable/discord.html).
@@ -21,4 +23,4 @@ install discord.py and python-dotenv via pip, then run
 Or run via Docker with
 `docker build -t discord-bot .`
 then
-`docker run -d -t release-bot` 
+`docker run -d -t discord-bot` 
