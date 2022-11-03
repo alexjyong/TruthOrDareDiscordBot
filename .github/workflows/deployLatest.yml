@@ -19,7 +19,7 @@ jobs:
                              
             - name: Update staging instance
               uses: appleboy/ssh-action@master
-              if: ${{ !github.event.inputs.prod }}
+              if: ${{ !github.event.inputs.prod_deploy }}
               with:
                 host: ${{ secrets.HOST }}
                 username: ${{ secrets.USERNAME }}
@@ -34,7 +34,7 @@ jobs:
 
             - name: Update prod instance
               uses: appleboy/ssh-action@master
-              if: ${{ github.event.inputs.prod }}
+              if: ${{ github.event.inputs.prod_deploy }}
               with:
                 host: ${{ secrets.HOST }}
                 username: ${{ secrets.USERNAME }}
