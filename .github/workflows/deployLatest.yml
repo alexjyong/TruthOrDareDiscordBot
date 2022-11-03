@@ -34,7 +34,7 @@ jobs:
 
             - name: Update prod instance
               uses: appleboy/ssh-action@master
-              if: ${{ github.event.inputs.prod_deploy == 'true }}
+              if: ${{ github.event.inputs.prod_deploy == 'true' }}
               with:
                 host: ${{ secrets.HOST }}
                 username: ${{ secrets.USERNAME }}
