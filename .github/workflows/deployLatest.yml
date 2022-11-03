@@ -1,6 +1,6 @@
 # This is a basic workflow that is manually triggered
 
-name: Manual workflow
+name: Deploy to server
 
 # Controls when the action will run. Workflow runs when manually triggered using the UI
 # or API.
@@ -20,6 +20,11 @@ jobs:
                 username: ${{ secrets.USERNAME }}
                 password: ${{ secrets.PASSWORD }}
                 port: 22
-                script: whoami
+                script: |
+                 cd Staging;
+                 git pull;
+                 docker container rm -f staging-td;
+                 docker build -t staging-td
+                 docker run --name staging-td -d -t staging-td
 
   
