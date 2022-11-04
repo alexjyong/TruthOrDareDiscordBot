@@ -27,6 +27,8 @@ jobs:
                 port: 22
                 script: |
                  cd Staging;
+                 git fetch;
+                 git checkout staging
                  git pull;
                  docker container rm -f staging-td;
                  docker build -t staging-td .
