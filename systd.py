@@ -14,7 +14,6 @@ truths_nsfw = []  ## Initialize
 dares_pg = []  ## Initialize
 dares_nsfw = []  ## Initialize
 
-
 def gen_tds():
     """Generate four lists for the Truth or Dares"""
     with open("tds.csv", newline="", encoding="utf-8") as csvfile:
@@ -193,6 +192,49 @@ async def addtd(interaction: discord.Interaction, truth_or_dare: app_commands.Ch
         nsfw = "No"
         rating = "PG"
     await interaction.response.send_message(f"You are trying to enter \"{tdinput}\" as a {rating} {truth_or_dare.value}\nThe bot is not processing submissions at this time")
+
+@client.tree.command()
+# @has_permissions(administrator=True)
+async def setchan(interaction: discord.Interaction):
+    '''Set the channel for the bot for this server'''
+    global sent_msg, embed
+    channel =  interaction.channel
+    server = interaction.guild
+    sender = interaction.user
+    #await sent_msg.edit(embed=embed, view=None)
+    if sender.guild_permissions.administrator:
+        global sent_msg
+        class MyButton(Button):
+            async def callback(self, interaction: interaction):
+                global sent_msg, embed, style, sleep_task
+                if self.label == "Yes":
+                    self.style=discord.ButtonStyle.primary
+                    title = "You clicked yes. This is the part where I'd write that into the database"
+                else:
+                    title = "Please run this command in the channel that you want to set for the bot"
+                    self.style=discord.ButtonStyle.danger
+                embed = discord.Embed(title=title)
+                embed.set_author(name=bot_author)
+                await sent_msg.edit(embed=embed, view=None)
+                #await interaction.response.send_message(embed=embed) # removed the view here; don't want the buttons at this point
+        
+
+        view = View()
+        labels = ("Yes", "No")
+        for label in labels:
+            if label == "Yes":
+                style = discord.ButtonStyle.primary
+            else:
+                style = discord.ButtonStyle.danger
+            view.add_item(MyButton(label=label, style=style))
+        title = f"Do you want to set this channel ({channel.name}) for the {bot_author} bot?"
+        embed = discord.Embed(title=title)
+        embed.set_author(name=bot_author)
+        await interaction.response.send_message(embed=embed, view=view)
+        sent_msg = await interaction.original_response()        
+        #await interaction.response.send_message(f"You are in channel {channel} with id: {channel.id}\nOn server: {server.name} with id: {server.id}\n{sender}")
+    else:
+        await interaction.response.send_message(f"You do not have the necessary permissions to perform this command")
 
 
 
