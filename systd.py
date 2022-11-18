@@ -88,7 +88,7 @@ def set_channel(server, channel, admin):
         "SELECT server_id, channel_id, admin_id FROM channels WHERE server_id = ? AND channel_id = ? LIMIT 1",
         (str(server), str(channel))
     ).fetchall()
-    if rows[0]:
+    if rows:
         print(f'Already set by {rows[0][2]}')
         title = f"This channel has already been set for the bot by {rows[0][2]}"
     else:
