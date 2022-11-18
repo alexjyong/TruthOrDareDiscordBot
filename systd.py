@@ -8,6 +8,7 @@ from discord.ui import Button, View
 import random
 import csv
 import asyncio
+import sqlite3
 
 truths_pg = []  ## Initialize
 truths_nsfw = []  ## Initialize
@@ -79,6 +80,43 @@ def gen_embed(person, color_code, type, nsfw="No"):
     embed.set_thumbnail(url='https://sharepointlist.com/images/TD2.png')
     return embed
 
+def set_channel(server, channel, admin):
+    # Check if this entry already exists
+    connection = sqlite3.connect("td.db")
+    cursor = connection.cursor()
+    rows = cursor.execute(
+        "SELECT server_id, channel_id, admin_id FROM channels WHERE server_id = ? AND channel_id = ? LIMIT 1",
+        (str(server), str(channel))
+    ).fetchall()
+    if rows[0]:
+        print(f'Already set by {rows[0][2]}')
+        title = f"This channel has already been set for the bot by {rows[0][2]}"
+    else:
+        # Add to db
+        cursor.execute(
+            "INSERT INTO channels (server_id, channel_id, admin_id) VALUES (?, ?, ?)",
+            (str(server), str(channel), str(admin))
+        )
+        connection.commit()
+        # ***** Verify
+        title = "Channel set successfully"
+    connection.close()
+    return title
+
+def chk_channel(server):
+    print(server)
+    connection = sqlite3.connect("td.db")
+    cursor = connection.cursor()
+    rows = cursor.execute(
+        f"SELECT server_id, channel_id, admin_id FROM channels WHERE server_id = {server}"
+    )
+    channels = []
+    if rows:
+        for row in rows:
+            print(f"Channel: {row[1]}")
+            channels.append(str(row[1]))
+    return channels            
+
 class MyClient(discord.Client):
     def __init__(self, *, intents: discord.Intents):
         super().__init__(intents=intents)
@@ -107,6 +145,14 @@ async def on_ready():
 async def play(interaction: discord.Interaction):
     '''Start the truth or dare activity'''
     global sent_msg, embed, sleep_time, sleep_task
+    # Check if this is the correct channel for the bot
+    channel = interaction.channel
+    server = interaction.guild
+    server_id = str(server.id)
+    channels = chk_channel(server_id)
+    if str(channel.id) not in channels:
+        print(f"User trying to run bot in wrong channel on {server.id}")
+        return None
     sleep_time = 300
     color_code = 0x0000FF
     embed = discord.Embed(title=interaction.user.display_name, color=color_code)
@@ -209,7 +255,10 @@ async def setchan(interaction: discord.Interaction):
                 global sent_msg, embed, style, sleep_task
                 if self.label == "Yes":
                     self.style=discord.ButtonStyle.primary
-                    title = "You clicked yes. This is the part where I'd write that into the database"
+                    print(f"Server: {server.id} | Channel: {channel.id} | Admin: {sender}")
+                    #title = "You clicked yes. This is the part where I'd write that into the database"
+                    title = set_channel(server.id, channel.id, sender)
+
                 else:
                     title = "Please run this command in the channel that you want to set for the bot"
                     self.style=discord.ButtonStyle.danger
