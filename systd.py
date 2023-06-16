@@ -1,29 +1,28 @@
 import discord
 import os
-import sqlite3
-import random
-import asyncio
-from discord import app_commands
-from discord.ui import Button, View
 from dotenv import load_dotenv
 
 load_dotenv()
+from discord import app_commands
+from discord.ui import Button, View
+import random
+import sqlite3
+import asyncio
 
-truths_pg = []
-truths_nsfw = []
-dares_pg = []
-dares_nsfw = []
+truths_pg = []  ## Initialize
+truths_nsfw = []  ## Initialize
+dares_pg = []  ## Initialize
+dares_nsfw = []  ## Initialize
 
 
 def gen_tds():
     """Generate four lists for the Truth or Dares"""
     conn = sqlite3.connect('tds.db')
     c = conn.cursor()
-
     for row in c.execute('SELECT * FROM tds'):
-        td = row[5]
-        type = row[6]
-        value = row[7]
+        td = row[0]
+        type = row[1]
+        value = row[2]
         if td == "Truth":
             if type == "SFW":
                 truths_pg.append(value)
@@ -38,8 +37,8 @@ def gen_tds():
     conn.close()
 
 
-gen_tds()
-
+gen_tds()  ## Run it once on load
+# copy all to master lists
 truths_pg_master = truths_pg.copy()
 truths_nsfw_master = truths_nsfw.copy()
 dares_pg_master = dares_pg.copy()
@@ -47,7 +46,7 @@ dares_nsfw_master = dares_nsfw.copy()
 
 bot_author = os.getenv("BOTAUTHOR")
 print(bot_author)
-if bot_author == None:
+if bot_author == None: #use this as default name if the user didn't set it.
     bot_author = "SysTD"
 
 def gen_embed(person, color_code, type, nsfw="No"):
@@ -62,10 +61,11 @@ def gen_embed(person, color_code, type, nsfw="No"):
         from_list = truths_nsfw
     elif type == "Truth" and nsfw == "No":
         from_list = truths_pg
-    else:
+    else:  ## Change this later.
         from_list = truths_pg
     td_value = random.choice(from_list)
     from_list.remove(td_value)
+    # If any list got emptied, copy it from the master
     if len(dares_nsfw) < 1:
         dares_nsfw = dares_nsfw_master.copy()
     if len(dares_pg) < 1:
@@ -93,43 +93,80 @@ class MyClient(discord.Client):
 intents = discord.Intents.default()
 client = MyClient(intents=intents)
 
+# Event Listener when going online
 @client.event
 async def on_ready():
+    # Counter to track how many servers bot is connected to
     guild_count = 0
+    # Loop through servers
     for guild in client.guilds:
+        # Print server name and ID
         print(f"- {guild.id} (name: {guild.name})")
-        guild_count += 1
-    print(f"Bot is in {guild_count} guilds.")
-    print("Bot Ready!")
-
-class NSFWOption(app_commands.Option):
-    async def callback(self, ctx, value):
-        ctx.data["nsfw"] = value
-
-class DareButton(Button):
-    async def callback(self, interaction: discord.Interaction):
-        color_code = discord.Color.red()
-        person = interaction.user.name
-        nsfw = interaction.message.interaction.data["nsfw"]
-        embed = gen_embed(person, color_code, "Dare", nsfw)
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
-class TruthButton(Button):
-    async def callback(self, interaction: discord.Interaction):
-        color_code = discord.Color.blue()
-        person = interaction.user.name
-        nsfw = interaction.message.interaction.data["nsfw"]
-        embed = gen_embed(person, color_code, "Truth", nsfw)
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
-class TruthOrDareView(View):
-    def __init__(self):
-        super().__init__()
-        self.add_item(TruthButton(style=Button.style.green, label='Truth'))
-        self.add_item(DareButton(style=Button.style.red, label='Dare'))
+        guild_count = guild_count + 1
+    # Print total
+    print("SysTD is in " + str(guild_count) + " servers.")
 
 @client.tree.command()
-async def truthordare(ctx, nsfw: NSFWOption("NSFW?", app_commands.OptionType.boolean, default=False)):
-    await ctx.send("Please select Truth or Dare!", view=TruthOrDareView(), ephemeral=True)
+async def play(interaction: discord.Interaction):
+    '''Start the truth or dare activity'''
+    global sent_msg, embed, sleep_time, sleep_task
+    sleep_time = 150
+    color_code = 0x0000FF
+    embed = discord.Embed(title=interaction.user.display_name, color=color_code)
+    embed.set_author(name=bot_author)
+    embed.set_thumbnail(url='https://sharepointlist.com/images/TD2.png')
 
-client.run(os.getenv("DISCORD_TOKEN"))
+    async def sleep_timer():
+        global sleep_task
+        try:
+            print("Starting sleep timer")
+            await asyncio.sleep(sleep_time)
+        except asyncio.CancelledError: # if it was canceled
+            # probably don't need the except since I'm not actually doing anything with it
+            print("Sleep timer canceled")
+            raise
+        else: # if it wasn't canceled
+            print("Sleep timer expired. Refreshing bot message and restarting sleep timer")
+            await sent_msg.edit(embed=embed, view=view)
+            sleep_task = asyncio.create_task(sleep_timer())
+        #finally: # Don't need a finally atm either
+            
+    class MyButton(Button):
+        async def callback(self, interaction: interaction):
+            global sent_msg, embed, style, sleep_task
+            # Cancel refresh timer
+            sleep_task.cancel()
+            await sent_msg.edit(embed=embed, view=None)
+            if self.label == "Truth" or self.label == "NSFW Truth":
+                color_code = 0x0000FF
+                type = "Truth"
+                self.style=discord.ButtonStyle.primary
+            elif self.label == "Dare" or self.label == "NSFW Dare":
+                color_code = 0xFF0000
+                type = "Dare"
+                self.style=discord.ButtonStyle.danger
+            if self.label == "NSFW Truth" or self.label == "NSFW Dare":
+                nsfw = "Yes"
+            else:
+                nsfw = "No"
+            person = interaction.user.display_name
+            embed = gen_embed(person, color_code, type, nsfw=nsfw)
+            await interaction.response.send_message(embed=embed, view=view)
+            sent_msg = await interaction.original_response()
+            # Restart refresh timer
+            sleep_task = asyncio.create_task(sleep_timer())
+
+    view = View()
+    labels = ("Truth", "Dare", "NSFW Truth", "NSFW Dare")
+    for label in labels:
+        if label == "Truth" or label == "NSFW Truth":
+            style = discord.ButtonStyle.primary
+        else:
+            style = discord.ButtonStyle.danger
+        view.add_item(MyButton(label=label, style=style))
+
+    await interaction.response.send_message(embed=embed, view=view)
+    sent_msg = await interaction.original_response()
+    sleep_task = asyncio.create_task(sleep_timer())
+
+client.run(os.getenv("TOKEN"))
