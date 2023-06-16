@@ -108,7 +108,7 @@ async def on_ready():
 async def play(interaction: discord.Interaction):
     '''Start the truth or dare activity'''
     global sent_msg, embed, sleep_time, sleep_task
-    sleep_time = 150
+    sleep_time = 300
     color_code = 0x0000FF
     embed = discord.Embed(title=interaction.user.display_name, color=color_code)
     embed.set_author(name=bot_author)
@@ -124,9 +124,11 @@ async def play(interaction: discord.Interaction):
             print("Sleep timer canceled")
             raise
         else: # if it wasn't canceled
-            print("Sleep timer expired. Refreshing bot message and restarting sleep timer")
-            await sent_msg.edit(embed=embed, view=view)
-            sleep_task = asyncio.create_task(sleep_timer())
+            print("Sleep timer expired. Refreshing bot message and removing buttons")
+            embed.add_field(name="Status", value="The current game has timed out. Send /play to start again")
+            await sent_msg.edit(embed=embed, view=None)
+            # Send a new message
+            #sleep_task = asyncio.create_task(sleep_timer())
         #finally: # Don't need a finally atm either
             
     class MyButton(Button):
@@ -154,7 +156,7 @@ async def play(interaction: discord.Interaction):
             # Restart refresh timer
             sleep_task = asyncio.create_task(sleep_timer())
 
-    view = View()
+    view = View(timeout=330)
     labels = ("Truth", "Dare", "NSFW Truth", "NSFW Dare")
     for label in labels:
         if label == "Truth" or label == "NSFW Truth":
@@ -166,5 +168,32 @@ async def play(interaction: discord.Interaction):
     await interaction.response.send_message(embed=embed, view=view)
     sent_msg = await interaction.original_response()
     sleep_task = asyncio.create_task(sleep_timer())
+
+@client.tree.command()
+@app_commands.describe(truth_or_dare="Truth or Dare?")
+@app_commands.choices(truth_or_dare=[
+    app_commands.Choice(name="Truth", value="Truth"),
+    app_commands.Choice(name="Dare", value="Dare")
+])
+@app_commands.describe(nsfw_or_nah="Is it NSFW or PG?")
+@app_commands.choices(nsfw_or_nah=[
+    app_commands.Choice(name="NSFW", value="Yes"),
+    app_commands.Choice(name="PG", value="No")
+])
+@app_commands.rename(tdinput='content')
+@app_commands.describe(tdinput='Your Truth or Dare')
+async def addtd(interaction: discord.Interaction, truth_or_dare: app_commands.Choice[str], nsfw_or_nah: app_commands.Choice[str], tdinput: str):
+    """Add a new item to the Truth or Dare bot"""
+    print("test")
+    print(f"{truth_or_dare.value} {nsfw_or_nah.value} {tdinput}")
+    if (nsfw_or_nah.value == "Yes"):
+        nsfw = "Yes"
+        rating = "NSFW"
+    else:
+        nsfw = "No"
+        rating = "PG"
+    await interaction.response.send_message(f"You are trying to enter \"{tdinput}\" as a {rating} {truth_or_dare.value}\nThe bot is not processing submissions at this time")
+
+
 
 client.run(os.getenv("TOKEN"))
