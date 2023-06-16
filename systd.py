@@ -19,7 +19,7 @@ def gen_tds():
     """Generate four lists for the Truth or Dares"""
     conn = sqlite3.connect('tds.db')
     c = conn.cursor()
-    for row in c.execute('SELECT * FROM tds'):
+    for row in c.execute('SELECT "What is it?", Type, "Truth or Dare" FROM tds'):
         td = row[0]
         type = row[1]
         value = row[2]
