@@ -6,7 +6,7 @@ Truth or Dare Discord bot! Inspired by https://truthordarebot.xyz/.
 
 To run on your discord server, set up a bot with [guide](https://discordpy.readthedocs.io/en/stable/discord.html).
 
-Clone this repo onto the server that you plan to run the bot out of. Within the repo, create a .env file.
+Clone this repo onto the server that you plan to run the bot out of. Within the repo, create a `.env` file.
 
 With your favorite editor, add this to the file:
 ```
